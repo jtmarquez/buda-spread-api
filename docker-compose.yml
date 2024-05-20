@@ -1,0 +1,32 @@
+version: "3.8"
+
+services:
+  api:
+    build:
+      context: ./app/api
+      dockerfile: Dockerfile
+    volumes:
+      - .:/app/api
+    ports:
+      - 8001:8000
+    networks:
+      - spread_api_network
+    healthcheck:
+       test: ["CMD", "curl", "-f", "http://localhost:8000/api/health/"]
+       interval: 10s
+       timeout: 5s
+       retries: 5
+  book_tick_ws:
+    build:
+      context: ./app/workers/book_ticks
+      dockerfile: Dockerfile
+    depends_on:
+      api:
+        condition: service_healthy
+    ports:
+      - 5001:5000
+    networks:
+      - spread_api_network
+networks:
+  spread_api_network:
+    driver: bridge
