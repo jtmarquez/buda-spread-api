@@ -1,14 +1,17 @@
 # SPREAD API
 - La solución propuesta está compuesta por dos grandes partes, cada uno con su propio container de Docker:
     1. API(`app/api`):
+       
         a. Se encarga de disponibilizar todos los endpoints necesarios, al igual que implementar la lógica de negocio y persistencia de datos. En este caso, se exponen 4 endpoints relevantes:
+       
             - GET /api/spreads: Permite obtener todos los spreads en una sola llamada
             - GET /api/spreads/{id}: Permite obtener el spread asociado a solamente un Market
             - GET /api/spread-alerts/{id}: Permite obtener un spread guardado, al igual que el spread actual
             - POST /api/spread-alerts: Permite crear un spread guardado
+       
         b. Implementa un websocket que recibe información sobre los cambios en los mercados desde el websocket implementado en la segunda parte de la solución.
 
-    2. Websocket(`app/workers/book_ticks`): Hace una solicitud inicial a la API de Buda para obtener los mercados disponibles, y luego se suscribe al websocket con sus canales asociados. En cada mensaje recibido en el websocket, se envía un mensaje al websocket de la API, el cual se encarga de actualizar la información de los spreads en la base de datos.
+    3. Websocket(`app/workers/book_ticks`): Hace una solicitud inicial a la API de Buda para obtener los mercados disponibles, y luego se suscribe al websocket con sus canales asociados. En cada mensaje recibido en el websocket, se envía un mensaje al websocket de la API, el cual se encarga de actualizar la información de los spreads en la base de datos.
 - La solución propuesta se encuentra implementada en Python, utilizando FastAPI, SQLite, Peewee, Websockets, entre otros. Se dividió en dos containers de Docker, uno para la API y otro para el websocket, lo que permite escalabilidad, en el caso de ser necesario. Una vez que se inicia el container de la API, el container del websocket se inicia automáticamente, comunicandose internamente a través de una red de Docker.
 - Se optó por este camino, pues existian algunas limitantes, como la cantidad de requests permitidas a la API de Buda, la necesidad de contar con información lo más actualizada posible, entre otros.
 
